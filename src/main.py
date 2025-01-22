@@ -7,7 +7,7 @@ import argparse
 
 from dotenv import load_dotenv
 
-import chat_obs
+from chat_obs import ChatOBS
 from EnvDefault import EnvDefault
 
 if __name__ == "__main__":
@@ -45,14 +45,36 @@ if __name__ == "__main__":
         type=str,
     )
 
+    obs_ws = parser.add_argument_group(
+        title="OBS Websocket API", description="OBS Websocket connection details"
+    )
+    obs_ws.add_argument(
+        "--obs-url",
+        action=EnvDefault,
+        envvar="OBS_URL",
+        help="What is the websocket URL of your OBS instance? (env: OBS_URL)",
+        default="ws://localhost:4444",
+        type=str,
+        required=False,
+    )
+    obs_ws.add_argument(
+        "--obs-password",
+        action=EnvDefault,
+        envvar="SECRET_OBS_PASSWORD",
+        help="What is the Websocket API password for OBS? (env: SECRET_OBS_PASSWORD)",
+        type=str,
+        required=True,
+    )
+
     args = parser.parse_args()
 
-    asyncio.run(
-        chat_obs.main(
-            {
-                "secret_twitch_app_id": args.twitch_app_id,
-                "secret_twitch_app_secret": args.twitch_app_secret,
-                "twitch_channel": args.twitch_channel
-            }
-        )
-    )
+    chat_obs = ChatOBS({
+        "secret_twitch_app_id": args.twitch_app_id,
+        "secret_twitch_app_secret": args.twitch_app_secret,
+        "twitch_channel": args.twitch_channel,
+        "obs_url": args.obs_url,
+        "secret_obs_password": args.obs_password,
+    })
+
+    asyncio.run(chat_obs.main())
+    
