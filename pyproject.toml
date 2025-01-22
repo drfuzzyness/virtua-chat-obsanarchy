@@ -1,0 +1,35 @@
+[project]
+name = "virtua-chat-obsanarchy"
+version = "0.1.0"
+description = "Twitch Chat integration for Virtua Gallery to swap between several OBS objects based on chat"
+authors = [
+    {name = "Matthew Conto",email = "conto@hey.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "simpleobsws (>=1.4.2,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+pylint = "^3.3.3"
+
+[tool.black]
+line-length = 88
+extend-exclude = '''
+/(
+  | ribbonweb/migrations
+	| docs
+	| dist
+	| build
+)/
+'''
+
+[tool.pylint.format]
+max-line-length = "88"
