@@ -1,19 +1,20 @@
 import logging
 import typing
-import re
 
 from twitchAPI.twitch import Twitch
 from twitchAPI.oauth import UserAuthenticator
 from twitchAPI.type import AuthScope, ChatEvent
-from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
+from twitchAPI.chat import Chat, EventData, ChatMessage
 
 USER_SCOPE = [AuthScope.CHAT_READ]
 
 logger = logging.Logger(__name__)
 
+
 class TriggerCallback(typing.Protocol):
     def __call__(self, message: ChatMessage) -> None:
         pass
+
 
 type Trigger = tuple[typing.Pattern, TriggerCallback]
 
@@ -56,21 +57,6 @@ class ChatIntegration:
         self.chat.register_event(ChatEvent.MESSAGE, self._on_message)
 
         self.chat.start()
-        try:
-            input("press ENTER to stop\\n")
-        finally:
-            # now we can close the chat bot and the twitch api client
-            self.chat.stop()
-            await self.twitch.close()
-
-    async def activate_object(self, target_object_name: str):
-        pass
-
-    async def get_object_scene_uuids(self) -> list[str]:
-        pass
-
-    async def get_object_scene_activation_state(self, object_uuid) -> bool:
-        pass
 
     async def _on_message(self, msg: ChatMessage):
         """
@@ -88,8 +74,6 @@ class ChatIntegration:
             self.chat.stop()
         if self.twitch:
             await self.twitch.close()
-        if self.ws:
-            await self.ws.disconnect()
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         return self.close()

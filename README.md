@@ -23,7 +23,7 @@ Make a `.env` file where you want to run the code, based on the [`.env.example` 
 ## Development
 
 1. Install Python [`^3.12`](https://www.python.org/downloads/release/python-3128/) from https://www.python.org/
-2. Install `poetry` https://python-poetry.org/docs/#installing-with-the-official-installer
+2. Install `poetry@^2.0.1`  https://python-poetry.org/docs/#installing-with-the-official-installer
 3. Clone this repository
 4. Install project dependencies with `poetry install`
 
@@ -37,10 +37,25 @@ Copy the [`.env.example` file here](./.env.example) to `.env` and fill it out wi
 poetry run py src/main.py
 ```
 
+or
+
+```sh
+poetry env activate
+py src/main.py
+```
+
 #### All others
 
 ```sh
 poetry run python src/main.py
+```
+
+or
+
+```sh
+poetry env activate
+python src/main.py
+```
 
 ### Building to executable
 

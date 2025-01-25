@@ -1,7 +1,6 @@
-import typing
+from obs_enabledisable import ObsEnableDisableConfig
+from chat_integration import TwitchConfig
 
-from ..obs_enabledisable import ObsEnableDisableConfig
-from ..chat_integration import TwitchConfig
 
 class Config(TwitchConfig, ObsEnableDisableConfig):
     """
