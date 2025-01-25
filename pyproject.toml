@@ -1,5 +1,5 @@
 [project]
-name = "virtua-chat-obsanarchy"
+name = "virtua_chat_obsanarchy"
 version = "0.1.0"
 description = "Twitch Chat integration for Virtua Gallery to swap between several OBS objects based on chat"
 authors = [
@@ -11,6 +11,8 @@ dependencies = [
     "simpleobsws (>=1.4.2,<2.0.0)",
     "twitchapi (>=4.4.0,<5.0.0)",
     "python-dotenv (>=1.0.1,<2.0.0)",
+    "coloredlogs (>=15.0.1,<16.0.0)",
+    "platformdirs (>=4.3.6,<5.0.0)",
 ]
 
 

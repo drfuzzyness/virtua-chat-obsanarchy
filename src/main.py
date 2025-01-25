@@ -4,6 +4,9 @@ Main CLI entrypoint for this app
 
 import asyncio
 import argparse
+import logging
+import re
+import sys
 
 from dotenv import load_dotenv
 
@@ -11,36 +14,26 @@ from chat_integration import ChatIntegration
 from obs_enabledisable import ObsEnableDisable
 from EnvDefault import EnvDefault
 
-
-async def main_loop(args: argparse.Namespace):
-    """Starts services, then async blocks until done."""
-    obs_integration = ObsEnableDisable(
-        {
-            "obs_url": args.obs_url,
-            "secret_obs_password": args.obs_password,
-            "target_object_names": ["[CAM 1]", "[CAM 2]", "[CAM 3]", "[CAM 4]"],
-        }
-    )
-
-    chat_integration = ChatIntegration(
-        {
-            "secret_twitch_app_id": args.twitch_app_id,
-            "secret_twitch_app_secret": args.twitch_app_secret,
-            "twitch_channel": args.twitch_channel,
-        },
-        [],
-    )
-    await obs_integration.begin()
-    await chat_integration.main()
+logger = logging.getLogger("virtua_chat_obsanarchy")
 
 
-if __name__ == "__main__":
+def main():
     load_dotenv()
 
     parser = argparse.ArgumentParser(
         prog="virtua-chat-obsanarchy",
-        description="Twitch Chat integration for Virtua Gallery to swap between several OBS objects based on chat",
+        description="Twitch Chat integration for Virtua Gallery"
+        + "to swap between several OBS objects based on chat",
     )
+
+    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+    parser.add_argument("--quiet", help="Disables debug logs", action="store_true")
+    parser.add_argument(
+        "--disable-colors",
+        help="Disables colorizing the program logs.",
+        action="store_true",
+    )
+
     twitch_api = parser.add_argument_group(
         title="Twitch API", description="Twitch Chat API integration"
     )
@@ -93,4 +86,67 @@ if __name__ == "__main__":
         type=str,
         required=True,
     )
-    asyncio.run(main_loop(parser.parse_args()))
+
+    args = parser.parse_args()
+
+    LOG_LEVEL = logging.INFO if args.quiet else logging.DEBUG
+    if args.disable_colors:
+        logging.basicConfig(level=LOG_LEVEL)
+    else:
+        import coloredlogs
+
+        coloredlogs.install(
+            level=LOG_LEVEL,
+            fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
+        )
+
+    # Mute some of the noisier modules
+    for level_info in [
+        "asyncio",
+        "simpleobsws",
+        "twitchAPI.twitch",
+        "twitchAPI.chat",
+        "twitchAPI.oauth",
+    ]:
+        logging.getLogger(level_info).setLevel(logging.INFO)
+
+    for level_warn in [
+        "aiohttp.access",
+    ]:
+        logging.getLogger(level_warn).setLevel(logging.INFO)
+
+    obs_integration = ObsEnableDisable(
+        {
+            "obs_url": args.obs_url,
+            "secret_obs_password": args.obs_password,
+            "target_object_names": ["[CAM 1]", "[CAM 2]", "[CAM 3]", "[CAM 4]"],
+        }
+    )
+
+    chat_integration = ChatIntegration(
+        {
+            "secret_twitch_app_id": args.twitch_app_id,
+            "secret_twitch_app_secret": args.twitch_app_secret,
+            "twitch_channel": args.twitch_channel,
+        },
+        [(re.compile("secret"), lambda msg: obs_integration.get_scene_item_list())],
+    )
+
+    logger.debug("Configuration valid, starting...")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    asyncio.gather(obs_integration.begin(), chat_integration.begin())
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        logger.info("Quitting from KeyboardInterrupt...")
+        # loop.create_task(chat_integration.close())
+        exit_task = asyncio.gather(chat_integration.close(), obs_integration.close())
+        loop.run_until_complete(exit_task)
+        logger.info("...goodbye 😊")
+        sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

@@ -8,17 +8,48 @@ For now, [run steps in Development](#development) first.
 
 Make a `.env` file where you want to run the code, based on the [`.env.example` file here](./.env.example) and fill it out with your secrets.
 
-### Windows
+### Creating a Twitch Token
+
+1. Enable 2FA on your Twitch account at https://www.twitch.tv/settings/security
+1. Go to https://dev.twitch.tv/console and sign in.
+2. Click **Register Your Application**
+3. Set a name (ex: `virtua-chat-obsanarchy`)
+4. Set the OAuth redirect URL to be this app's OAuth server `http://localhost:17563`
+5. Set the category (ex: **Broadcaster Suite**)
+6. Set the client type to **Confidential**
+7. Prove that you exist
+8. Click **Manage** on your new Application
+9. Grab the **Client ID** as `SECRET_TWITCH_APP_ID`
+10. Grab the **Client Secret** as `SECRET_TWITCH_APP_SECRET`
+
+### Setting up OBS
+
+1. Don't install the old plugin ["OBS Websocket API"](https://github.com/obsproject/obs-websocket/releases) as it's built into OBS now and will cause conficts if you run the old installer
+    - If you get errors about OBS Websockets when you start OBS, use **Help** / **Check File Integrity**
+2. Open **OBS**. Go to **Tools** / **WebSocket Server Settings**
+3. **Generate Password**
+4. Press **Show Connect Info**
+5. Grab the password from there as `SECRET_OBS_PASSWORD`
+6. Grab the server port to put into `OBS_URL` in the format `ws://localhost:YOUR_PORT_HERE` (see [`.env.example`](./.env.example))
+
+### First Run
+
+1. Start the program, be ready for a browser window to open.
+
+Windows:
 
 ```ps1
-.\virtua-chat-obsanarchy.exe --help
+.\virtua-chat-obsanarchy.exe
 ```
 
-### All others
+All others:
 
 ```sh
 ./virtua-chat-obsanarchy --help
 ```
+
+2. A browser tab will open to `https://www.twitch.tv/login?client_id=....`. Log into Twitch using your production Twitch account, and authorize yourself against your app.
+
 
 ## Development
 

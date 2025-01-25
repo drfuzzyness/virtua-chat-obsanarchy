@@ -1,18 +1,22 @@
+import asyncio
 import logging
 import typing
+import pathlib
+import os.path
 
 from twitchAPI.twitch import Twitch
-from twitchAPI.oauth import UserAuthenticator
+from twitchAPI.oauth import UserAuthenticationStorageHelper
 from twitchAPI.type import AuthScope, ChatEvent
 from twitchAPI.chat import Chat, EventData, ChatMessage
+import platformdirs
 
 USER_SCOPE = [AuthScope.CHAT_READ]
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TriggerCallback(typing.Protocol):
-    def __call__(self, message: ChatMessage) -> None:
+    async def __call__(self, message: ChatMessage):
         pass
 
 
@@ -35,20 +39,33 @@ class ChatIntegration:
         self.config = config
         self.triggers = triggers
 
-    async def main(self):
+    async def begin(self):
         """
         Main asyncio function
         >>>  asyncio.run(my_chat.main())
         """
+        logger.debug("Creating local OAuth storage...")
+        twitch_auth_file_dir = pathlib.Path(
+            os.path.join(
+                platformdirs.user_config_dir(
+                    "drfuzzyness", "virtua_chat_obsanarchy", ensure_exists=True
+                ),
+                "twitch.json",
+            )
+        )
+        twitch_auth_file_dir.touch()
 
-        logger.info("Connecting to Twitch...")
+        logger.debug("Setting up Twitch OAuth Handling...")
         self.twitch = await Twitch(
             self.config["secret_twitch_app_id"], self.config["secret_twitch_app_secret"]
         )
-        auth = UserAuthenticator(self.twitch, USER_SCOPE)
+        helper = UserAuthenticationStorageHelper(
+            self.twitch,
+            USER_SCOPE,
+            storage_path=pathlib.PurePath(twitch_auth_file_dir),
+        )
         logger.info("Authenticating to Twitch...")
-        token, refresh_token = await auth.authenticate()
-        await self.twitch.set_user_authentication(token, USER_SCOPE, refresh_token)
+        await helper.bind()
 
         logger.info("Connecting to Twitch Chat...")
         self.chat = await Chat(self.twitch)
@@ -62,7 +79,15 @@ class ChatIntegration:
         """
         Whenever anyone sends a message in chat, this is called. If this bot sends a message, this will be called
         """
-        logger.info('Room %s: "%s": "%s"', msg.room.name, msg.user.name, msg.text)
+        logger.debug('%s: "%s": "%s"', msg.room.name, msg.user.name, msg.text)
+        tasks = []
+
+        for [matcher, callback] in self.triggers:
+            if matcher.match(msg.text):
+                tasks.append(callback(msg))
+        
+        await asyncio.gather(*tasks)
+
 
     async def _on_ready(self, ready_event: EventData):
         logger.info("Connected to Twitch Chat, joining channel...")
@@ -70,10 +95,7 @@ class ChatIntegration:
 
     async def close(self):
         """Code to cleanup the app once finished"""
-        if self.chat:
+        if self.chat and self.chat.is_connected():
             self.chat.stop()
         if self.twitch:
             await self.twitch.close()
-
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        return self.close()
