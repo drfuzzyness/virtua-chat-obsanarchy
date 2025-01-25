@@ -85,9 +85,8 @@ class ChatIntegration:
         for [matcher, callback] in self.triggers:
             if matcher.match(msg.text):
                 tasks.append(callback(msg))
-        
-        await asyncio.gather(*tasks)
 
+        await asyncio.gather(*tasks)
 
     async def _on_ready(self, ready_event: EventData):
         logger.info("Connected to Twitch Chat, joining channel...")

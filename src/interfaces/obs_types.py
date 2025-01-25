@@ -1,5 +1,4 @@
 import typing
-import simpleobsws
 
 
 class CurrentProgramSceneChanged(typing.TypedDict):
@@ -10,6 +9,7 @@ class CurrentProgramSceneChanged(typing.TypedDict):
 class GetCurrentProgramScene(typing.TypedDict):
     sceneName: str
     sceneUuid: str
+
 
 class SceneItemTransform(typing.TypedDict):
     alignment: int
@@ -32,6 +32,7 @@ class SceneItemTransform(typing.TypedDict):
     sourceWidth: float
     width: float
 
+
 class SceneItem(typing.TypedDict):
     inputKind: str
     isGroup: bool
@@ -44,6 +45,7 @@ class SceneItem(typing.TypedDict):
     sourceName: str
     sourceType: str
     sourceUuid: str
+
 
 class GetSceneItemList(typing.TypedDict):
     sceneItems: list[SceneItem]
