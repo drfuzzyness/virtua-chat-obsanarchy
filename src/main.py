@@ -7,7 +7,7 @@ import argparse
 
 from dotenv import load_dotenv
 
-from chat_obs import ChatOBS
+from chat_integration import ChatIntegration
 from EnvDefault import EnvDefault
 
 if __name__ == "__main__":
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    chat_obs = ChatOBS({
+    chat_obs = ChatIntegration({
         "secret_twitch_app_id": args.twitch_app_id,
         "secret_twitch_app_secret": args.twitch_app_secret,
         "twitch_channel": args.twitch_channel,

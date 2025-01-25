@@ -1,32 +1,43 @@
 import logging
-
+import typing
+import re
 
 from twitchAPI.twitch import Twitch
 from twitchAPI.oauth import UserAuthenticator
 from twitchAPI.type import AuthScope, ChatEvent
 from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
-import simpleobsws
 
-from interfaces.Config import Config
-
-USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
+USER_SCOPE = [AuthScope.CHAT_READ]
 
 logger = logging.Logger(__name__)
 
+class TriggerCallback(typing.Protocol):
+    def __call__(self, message: ChatMessage) -> None:
+        pass
 
-class ChatOBS:
-    ws: simpleobsws.WebSocketClient | None = None
-    config: Config
+type Trigger = tuple[typing.Pattern, TriggerCallback]
+
+
+class TwitchConfig(typing.TypedDict):
+    secret_twitch_app_id: str
+    secret_twitch_app_secret: str
+    twitch_channel: str
+
+
+class ChatIntegration:
+    config: TwitchConfig
     chat: Chat | None = None
     twitch: Twitch | None = None
+    triggers: list[Trigger]
 
-    def __init__(self, config: Config):
+    def __init__(self, config: TwitchConfig, triggers: list[Trigger]):
         self.config = config
+        self.triggers = triggers
 
     async def main(self):
         """
         Main asyncio function
-        >>>  asyncio.run(my_chatobs.main())
+        >>>  asyncio.run(my_chat.main())
         """
 
         logger.info("Connecting to Twitch...")
@@ -45,13 +56,6 @@ class ChatOBS:
         self.chat.register_event(ChatEvent.MESSAGE, self._on_message)
 
         self.chat.start()
-
-        logger.info("Connecting to OBS...")
-        self.ws = simpleobsws.WebSocketClient(
-            url=self.config["obs_url"], password=self.config["secret_obs_password"]
-        )
-        await self.ws.connect()  # Make the connection to obs-websocket
-        await self.ws.wait_until_identified()  # Wait for the identification handshake to complete
         try:
             input("press ENTER to stop\\n")
         finally:
