@@ -55,7 +55,7 @@ class ChatIntegration:
         )
         twitch_auth_file_dir.touch()
 
-        logger.debug("Setting up Twitch OAuth Handling...")
+        logger.debug("Setting up Twitch OAuth Handling in %s...", twitch_auth_file_dir)
         self.twitch = await Twitch(
             self.config["secret_twitch_app_id"], self.config["secret_twitch_app_secret"]
         )
@@ -89,8 +89,8 @@ class ChatIntegration:
         await asyncio.gather(*tasks)
 
     async def _on_ready(self, ready_event: EventData):
-        logger.info("Connected to Twitch Chat, joining channel...")
         await ready_event.chat.join_room(self.config["twitch_channel"])
+        logger.info("Connected to Twitch Chat")
 
     async def close(self):
         """Code to cleanup the app once finished"""

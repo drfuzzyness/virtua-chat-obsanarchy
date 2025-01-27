@@ -50,11 +50,14 @@ All others:
 
 2. A browser tab will open to `https://www.twitch.tv/login?client_id=....`. Log into Twitch using your production Twitch account, and authorize yourself against your app.
 
+You're good to go! The login credential is now saved to your user's Appdata folder and will be reused. After some time, the token will need to be refreshed, which will automatically cause a browser window to open.
+
 
 ## Development
 
 1. Install Python [`^3.12`](https://www.python.org/downloads/release/python-3128/) from https://www.python.org/
 2. Install `poetry@^2.0.1`  https://python-poetry.org/docs/#installing-with-the-official-installer
+    - Follow the steps at the end of the installer's output to add `POETRY` to your `PATH`!
 3. Clone this repository
 4. Install project dependencies with `poetry install`
 

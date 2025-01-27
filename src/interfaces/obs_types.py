@@ -49,3 +49,37 @@ class SceneItem(typing.TypedDict):
 
 class GetSceneItemList(typing.TypedDict):
     sceneItems: list[SceneItem]
+
+
+class BaseFilter(typing.TypedDict):
+    filterEnabled: bool
+    filterIndex: int
+    filterKind: str
+    filterName: str
+    filterSettings: dict[str, typing.Any]
+
+
+class ColorKeyFilterV2Settings(typing.TypedDict):
+    key_color_type: typing.NotRequired[
+        typing.Literal["green"]
+        | typing.Literal["red"]
+        | typing.Literal["blue"]
+        | typing.Literal["custom"]
+    ]
+    key_color: typing.NotRequired[int]
+    """The Hex color when using key_color_type: custom"""
+    brightness: typing.NotRequired[float]
+    opacity: typing.NotRequired[float]
+    contrast: typing.NotRequired[float]
+    gamma: typing.NotRequired[float]
+    similarity: typing.NotRequired[int]
+    smoothness: typing.NotRequired[int]
+
+
+class ColorKeyFilterV2(BaseFilter):
+    filterKind: typing.Literal["color_key_filter_v2"]
+    filterSettings: ColorKeyFilterV2Settings
+
+
+class GetSourceFilterList(typing.TypedDict):
+    filters: list[ColorKeyFilterV2]

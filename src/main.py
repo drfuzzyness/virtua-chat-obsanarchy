@@ -9,6 +9,7 @@ import re
 import sys
 
 from dotenv import load_dotenv
+import coloredlogs
 
 from chat_integration import ChatIntegration
 from obs_enabledisable import ObsEnableDisable
@@ -89,16 +90,16 @@ def main():
 
     args = parser.parse_args()
 
-    LOG_LEVEL = logging.INFO if args.quiet else logging.DEBUG
+    log_level = logging.INFO if args.quiet else logging.DEBUG
     if args.disable_colors:
-        logging.basicConfig(level=LOG_LEVEL)
+        logging.basicConfig(level=log_level)
     else:
-        import coloredlogs
-
         coloredlogs.install(
-            level=LOG_LEVEL,
+            level=log_level,
             fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
         )
+
+    object_names = ["[CAM 1]", "[CAM 2]", "[CAM 3]"]
 
     # Mute some of the noisier modules
     for level_info in [
@@ -113,13 +114,13 @@ def main():
     for level_warn in [
         "aiohttp.access",
     ]:
-        logging.getLogger(level_warn).setLevel(logging.INFO)
+        logging.getLogger(level_warn).setLevel(logging.WARN)
 
     obs_integration = ObsEnableDisable(
         {
             "obs_url": args.obs_url,
             "secret_obs_password": args.obs_password,
-            "target_object_names": ["[CAM 1]", "[CAM 2]", "[CAM 3]", "[CAM 4]"],
+            "target_object_names": object_names,
         }
     )
 
@@ -129,7 +130,20 @@ def main():
             "secret_twitch_app_secret": args.twitch_app_secret,
             "twitch_channel": args.twitch_channel,
         },
-        [(re.compile("secret"), lambda msg: obs_integration.get_scene_item_list())],
+        [
+            (
+                re.compile("Cam 1"),
+                lambda msg: obs_integration.activate_object(object_names[0]),
+            ),
+            (
+                re.compile("Cam 2"),
+                lambda msg: obs_integration.activate_object(object_names[1]),
+            ),
+            (
+                re.compile("Cam 3"),
+                lambda msg: obs_integration.activate_object(object_names[2]),
+            ),
+        ],
     )
 
     logger.debug("Configuration valid, starting...")
