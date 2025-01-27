@@ -1,10 +1,18 @@
 # Virtua Chat OBS Anarchy
 
-Twitch Chat integration for Virtua Gallery to swap between several OBS objects based on chat
+Twitch Chat integration for Virtua Gallery to swap between several OBS objects based on chat.
+
+When a viewer posts in chat any of the following triggers, the corresponding OBS Source with corresponding name will have its opacity either set to visible or transparent.
+
+| Chat message regex | OBS Source Name |
+|--------------------|-----------------|
+| "Cam 1"            | `[CAM 1]`       |
+| "Cam 2"            | `[CAM 2]`       |
+| "Cam 3"            | `[CAM 3]`       |
 
 ## Running
 
-For now, [run steps in Development](#development) first.
+**Download the pre-built program from here: https://github.com/drfuzzyness/virtua-chat-obsanarchy/releases/latest**
 
 Make a `.env` file where you want to run the code, based on the [`.env.example` file here](./.env.example) and fill it out with your secrets.
 
@@ -22,7 +30,7 @@ Make a `.env` file where you want to run the code, based on the [`.env.example` 
 9. Grab the **Client ID** as `SECRET_TWITCH_APP_ID`
 10. Grab the **Client Secret** as `SECRET_TWITCH_APP_SECRET`
 
-### Setting up OBS
+### Setting up OBS Settings
 
 1. Don't install the old plugin ["OBS Websocket API"](https://github.com/obsproject/obs-websocket/releases) as it's built into OBS now and will cause conficts if you run the old installer
     - If you get errors about OBS Websockets when you start OBS, use **Help** / **Check File Integrity**
@@ -31,6 +39,16 @@ Make a `.env` file where you want to run the code, based on the [`.env.example` 
 4. Press **Show Connect Info**
 5. Grab the password from there as `SECRET_OBS_PASSWORD`
 6. Grab the server port to put into `OBS_URL` in the format `ws://localhost:YOUR_PORT_HERE` (see [`.env.example`](./.env.example))
+
+### Setting up your OBS Scenes
+
+For each of your OBS scenes, you'll need to make three sources with the following _exact_ names.
+
+- `[CAM 1]`
+- `[CAM 2]`
+- `[CAM 3]`
+
+The name of the source is what allows the app to change the opacity to show and hide the source.
 
 ### First Run
 
