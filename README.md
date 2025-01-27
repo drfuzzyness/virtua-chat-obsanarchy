@@ -50,6 +50,8 @@ For each of your OBS scenes, you'll need to make three sources with the followin
 
 The name of the source is what allows the app to change the opacity to show and hide the source.
 
+You'll also need to add the **Color Key** Filter to each source. Right click on a source, and choose **Filters**. In the bottom left of the window, click the **Plus** icon, and choose **Color Key**. You can leave all settings as default. This program will automatically change the opacity of that from `0` to `1` to deactivate or activate the source.
+
 ### First Run
 
 1. Start the program, be ready for a browser window to open.
