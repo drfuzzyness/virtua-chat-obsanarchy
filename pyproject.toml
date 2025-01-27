@@ -1,6 +1,6 @@
 [project]
 name = "virtua_chat_obsanarchy"
-version = "0.1.0"
+version = "0.2.0"
 description = "Twitch Chat integration for Virtua Gallery to swap between several OBS objects based on chat"
 authors = [{ name = "Matthew Conto", email = "matthew@conto.dev" }]
 readme = "README.md"

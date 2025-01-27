@@ -10,6 +10,7 @@ import sys
 
 from dotenv import load_dotenv
 import coloredlogs
+import twitchAPI.chat
 
 from chat_integration import ChatIntegration
 from obs_enabledisable import ObsEnableDisable
@@ -27,7 +28,7 @@ def main():
         + "to swap between several OBS objects based on chat",
     )
 
-    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 0.2.0")
     parser.add_argument("--quiet", help="Disables debug logs", action="store_true")
     parser.add_argument(
         "--disable-colors",
@@ -124,6 +125,15 @@ def main():
         }
     )
 
+    async def trigger_source(msg: twitchAPI.chat.ChatMessage, trigger_index: int):
+        logger.info(
+            '%s has triggered source %s with message: "%s"',
+            msg.user.display_name,
+            object_names[trigger_index],
+            msg.text,
+        )
+        await obs_integration.activate_object(object_names[trigger_index])
+
     chat_integration = ChatIntegration(
         {
             "secret_twitch_app_id": args.twitch_app_id,
@@ -133,15 +143,15 @@ def main():
         [
             (
                 re.compile("Cam 1"),
-                lambda msg: obs_integration.activate_object(object_names[0]),
+                lambda msg: trigger_source(msg, 0),
             ),
             (
                 re.compile("Cam 2"),
-                lambda msg: obs_integration.activate_object(object_names[1]),
+                lambda msg: trigger_source(msg, 1),
             ),
             (
                 re.compile("Cam 3"),
-                lambda msg: obs_integration.activate_object(object_names[2]),
+                lambda msg: trigger_source(msg, 2),
             ),
         ],
     )

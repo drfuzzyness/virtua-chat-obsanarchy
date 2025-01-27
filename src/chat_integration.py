@@ -79,7 +79,7 @@ class ChatIntegration:
         """
         Whenever anyone sends a message in chat, this is called. If this bot sends a message, this will be called
         """
-        logger.debug('%s: "%s": "%s"', msg.room.name, msg.user.name, msg.text)
+        logger.debug('[#%s] %s: "%s"', msg.room.name, msg.user.name, msg.text)
         tasks = []
 
         for [matcher, callback] in self.triggers:
