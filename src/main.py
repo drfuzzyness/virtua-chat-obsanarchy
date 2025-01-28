@@ -100,8 +100,6 @@ def main():
             fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
         )
 
-    object_names = ["[CAM 1]", "[CAM 2]", "[CAM 3]"]
-
     # Mute some of the noisier modules
     for level_info in [
         "asyncio",
@@ -116,6 +114,8 @@ def main():
         "aiohttp.access",
     ]:
         logging.getLogger(level_warn).setLevel(logging.WARN)
+
+    object_names = ["[CAM 1]", "[CAM 2]", "[CAM 3]", "[CAM 4]"]
 
     obs_integration = ObsEnableDisable(
         {
@@ -142,16 +142,20 @@ def main():
         },
         [
             (
-                re.compile("Cam 1"),
+                re.compile("Cam 1", re.IGNORECASE),
                 lambda msg: trigger_source(msg, 0),
             ),
             (
-                re.compile("Cam 2"),
+                re.compile("Cam 2", re.IGNORECASE),
                 lambda msg: trigger_source(msg, 1),
             ),
             (
-                re.compile("Cam 3"),
+                re.compile("Cam 3", re.IGNORECASE),
                 lambda msg: trigger_source(msg, 2),
+            ),
+            (
+                re.compile("Cam 4", re.IGNORECASE),
+                lambda msg: trigger_source(msg, 3),
             ),
         ],
     )
